@@ -14,9 +14,14 @@ export default function App(): React.JSX.Element {
 
   const [currentPage, setCurrentPage] = useState<number>(1);
 
-  // 1. Initial fetch on mount (Connected Internet)
+  // 1. Initial fetch with cleanup abort (Cancels previous duplicate request on StrictMode remount)
   useEffect(() => {
-    dispatch(fetchAllBreeds());
+    const promise = dispatch(fetchAllBreeds());
+
+    return () => {
+      // Hủy request của lần mount thứ nhất nếu component unmount
+      promise.abort();
+    };
   }, [dispatch]);
 
   const handleCallApi = () => {
