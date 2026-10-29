@@ -8,51 +8,23 @@ interface BreedCardProps {
 export function BreedCard({ breed }: BreedCardProps): React.JSX.Element {
   const attr = breed.attributes;
 
-  // 1. CHỈ dùng link ảnh tĩnh trực tiếp từ CDN (.webp / .jpg), KHÔNG dùng link API redirect 302
+  // 1. Link ảnh tĩnh CDN trực tiếp (.webp / .jpg)
   const directImageUrl = attr.images?.[0]?.medium || attr.images?.[0]?.url || null;
 
-  // 2. Nếu không có link ảnh HOẶC đang mất mạng thì xác định trạng thái lỗi ngay
-  const [imgError, setImgError] = useState<boolean>(() => {
-    if (!directImageUrl) return true;
-    return typeof navigator !== 'undefined' ? !navigator.onLine : false;
-  });
+  // 2. KHÔNG chặn trước bằng navigator.onLine! Ban đầu luôn để false để thẻ <img>
+  // có cơ hội lấy file ảnh từ Disk Cache (nếu đã từng xem qua trước đó).
+  const [imgError, setImgError] = useState<boolean>(!directImageUrl);
 
-  // 3. Xử lý timeout an toàn: nếu ảnh bị treo quá 3 giây (khi mạng chập chờn), hiện Placeholder ngay lập tức
+  // 3. Khi có mạng trở lại, tự động reset để tải lại ảnh thật
   useEffect(() => {
-    if (!directImageUrl || imgError) return;
+    if (!directImageUrl) return;
 
-    // Timeout 3 giây tự động ngắt nếu trình duyệt cố retry mạng
-    const timer = setTimeout(() => {
-      if (typeof navigator !== 'undefined' && !navigator.onLine) {
-        setImgError(true);
-      }
-    }, 3000);
-
-    return () => clearTimeout(timer);
-  }, [directImageUrl, imgError]);
-
-  // 4. Lắng nghe sự kiện online/offline của trình duyệt
-  useEffect(() => {
     const handleOnline = () => {
-      if (directImageUrl) {
-        setImgError(false); // Bật mạng lại -> tự động tải lại ảnh thật ngay
-      }
-    };
-
-    const handleOffline = () => {
-      // Khi mất mạng, nếu thẻ img chưa có sẵn trong cache -> kích hoạt fallback ngay trong 0s
-      if (!directImageUrl) {
-        setImgError(true);
-      }
+      setImgError(false);
     };
 
     window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
+    return () => window.removeEventListener('online', handleOnline);
   }, [directImageUrl]);
 
   const lifeMin = attr.life?.min ?? '?';
@@ -64,7 +36,6 @@ export function BreedCard({ breed }: BreedCardProps): React.JSX.Element {
 
   return (
     <article className="breed-card">
-      {/* Khung hiển thị ảnh với phản hồi Offline tức thì */}
       <div className="breed-image-wrap">
         {directImageUrl && !imgError ? (
           <img
@@ -72,6 +43,8 @@ export function BreedCard({ breed }: BreedCardProps): React.JSX.Element {
             alt={attr.name}
             loading="lazy"
             className="breed-image"
+            // Chỉ khi trình duyệt thực sự không tìm thấy ảnh trong Disk Cache
+            // và cũng không có mạng để tải, sự kiện onError mới kích hoạt Placeholder
             onError={() => setImgError(true)}
           />
         ) : (
