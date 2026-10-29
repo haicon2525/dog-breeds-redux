@@ -43,6 +43,7 @@ export default function App(): React.JSX.Element {
   }, [items, currentPage]);
 
   const isLoading = status === 'loading';
+  const isApiFailed = status === 'failed';
 
   return (
     <div className="app-layout">
@@ -53,7 +54,7 @@ export default function App(): React.JSX.Element {
       </header>
 
       {/* Thông báo trạng thái: lỗi khi ngắt mạng hoặc loading */}
-      {status === 'failed' && (
+      {isApiFailed && (
         <ErrorState
           error={error}
           cachedCount={totalCount}
@@ -69,9 +70,13 @@ export default function App(): React.JSX.Element {
         </div>
       )}
 
-      {/* Danh sách giống chó (Tự động thích ứng: Online có ảnh, Offline gọn gàng dạng Text Card) */}
+      {/* Danh sách giống chó: Tự động ẩn sạch khung ảnh khi mất mạng / lỗi API */}
       <main className="main-content">
-        <BreedList breeds={paginatedBreeds} isOnline={isOnline} />
+        <BreedList
+          breeds={paginatedBreeds}
+          isOnline={isOnline}
+          isApiFailed={isApiFailed}
+        />
       </main>
 
       {/* Phân trang: Có chọn nhanh trang bất kỳ ở giữa + nút Đầu/Cuối */}
