@@ -5,10 +5,9 @@ import type { BreedResource } from '../types/breeds.types';
 interface BreedListProps {
   breeds: BreedResource[];
   isOnline: boolean;
-  isApiFailed: boolean;
 }
 
-export function BreedList({ breeds, isOnline, isApiFailed }: BreedListProps): React.JSX.Element {
+export function BreedList({ breeds, isOnline }: BreedListProps): React.JSX.Element {
   if (breeds.length === 0) {
     return (
       <div className="empty-state">
@@ -20,12 +19,7 @@ export function BreedList({ breeds, isOnline, isApiFailed }: BreedListProps): Re
   return (
     <div className="breed-grid">
       {breeds.map((breed) => (
-        <BreedCard
-          key={breed.id}
-          breed={breed}
-          isOnline={isOnline}
-          isApiFailed={isApiFailed}
-        />
+        <BreedCard key={breed.id} breed={breed} isOnline={isOnline} />
       ))}
     </div>
   );

@@ -38,7 +38,6 @@ export default function App(): React.JSX.Element {
   }, [items, currentPage]);
 
   const isLoading = status === 'loading';
-  const isApiFailed = status === 'failed';
 
   return (
     <div className="app-layout">
@@ -55,13 +54,9 @@ export default function App(): React.JSX.Element {
         </div>
       )}
 
-      {/* Danh sách giống chó */}
+      {/* Danh sách giống chó: Ổn định tuyệt đối, không phụ thuộc vào trạng thái API tạm thời */}
       <main className="main-content">
-        <BreedList
-          breeds={paginatedBreeds}
-          isOnline={isOnline}
-          isApiFailed={isApiFailed}
-        />
+        <BreedList breeds={paginatedBreeds} isOnline={isOnline} />
       </main>
 
       {/* Phân trang */}
