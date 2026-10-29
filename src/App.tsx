@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { useAppDispatch, useAppSelector } from './store/hooks';
 import { fetchAllBreeds } from './store/breedsThunks';
 import { useOnlineStatus } from './hooks/useOnlineStatus';
@@ -15,17 +15,27 @@ export default function App(): React.JSX.Element {
 
   const [currentPage, setCurrentPage] = useState<number>(1);
 
-  // 1. Initial fetch with cleanup abort on mount
+  // 1. Biến cờ chặn StrictMode chạy đúp ở lần mount đầu tiên
+  // Giúp không bị duplicate và không còn request đỏ (canceled)
+  const hasInitialized = useRef<boolean>(false);
+
+  // 2. Biến cờ theo dõi: CHỈ khi nào từng bị mất mạng rồi mới có mạng lại thì mới tự gọi lại API
+  const wasOffline = useRef<boolean>(false);
+
+  // Gọi API lần đầu tiên khi mở web (chạy đúng 1 lần duy nhất)
   useEffect(() => {
-    const promise = dispatch(fetchAllBreeds());
-    return () => {
-      promise.abort();
-    };
+    if (hasInitialized.current) return;
+    hasInitialized.current = true;
+
+    dispatch(fetchAllBreeds());
   }, [dispatch]);
 
-  // 2. Tự động đồng bộ lại khi có mạng trở lại
+  // Lắng nghe khi mạng chuyển từ Offline -> Online
   useEffect(() => {
-    if (isOnline) {
+    if (!isOnline) {
+      wasOffline.current = true; // Ghi nhận vừa bị rớt mạng
+    } else if (wasOffline.current) {
+      wasOffline.current = false; // Có mạng lại -> mới tự động gọi lại API để đồng bộ
       dispatch(fetchAllBreeds());
     }
   }, [isOnline, dispatch]);
@@ -54,7 +64,7 @@ export default function App(): React.JSX.Element {
         </div>
       )}
 
-      {/* Danh sách giống chó: Ổn định tuyệt đối, không phụ thuộc vào trạng thái API tạm thời */}
+      {/* Danh sách giống chó */}
       <main className="main-content">
         <BreedList breeds={paginatedBreeds} isOnline={isOnline} />
       </main>
