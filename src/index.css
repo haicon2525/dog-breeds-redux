@@ -14,12 +14,12 @@ body {
 .app-layout {
   max-width: 1100px;
   margin: 0 auto;
-  padding: 2rem 1rem 3rem;
+  padding: 2rem 1rem 3.5rem;
 }
 
 .header {
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1.75rem;
 }
 
 .header h1 {
@@ -32,39 +32,20 @@ body {
   margin-top: 0.25rem;
 }
 
-.control-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-  background: #ffffff;
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
-  border: 1px solid #e2e8f0;
-}
-
+/* Nút dùng chung */
 .btn {
   border: none;
   border-radius: 6px;
-  padding: 0.6rem 1.1rem;
+  padding: 0.55rem 1rem;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   cursor: pointer;
-  transition: opacity 0.2s;
+  transition: all 0.15s ease;
 }
 
 .btn:disabled {
-  opacity: 0.55;
+  opacity: 0.5;
   cursor: not-allowed;
-}
-
-.btn-primary {
-  background-color: #2563eb;
-  color: #ffffff;
-}
-
-.btn-primary:hover:not(:disabled) {
-  background-color: #1d4ed8;
 }
 
 .btn-secondary {
@@ -85,34 +66,6 @@ body {
 
 .btn-retry:hover:not(:disabled) {
   background-color: #b45309;
-}
-
-.status-badge {
-  padding: 0.25rem 0.65rem;
-  border-radius: 999px;
-  font-size: 0.8rem;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-
-.status-idle {
-  background: #e2e8f0;
-  color: #475569;
-}
-
-.status-loading {
-  background: #e0f2fe;
-  color: #0369a1;
-}
-
-.status-succeeded {
-  background: #dcfce7;
-  color: #166534;
-}
-
-.status-failed {
-  background: #fee2e2;
-  color: #991b1b;
 }
 
 .loading-bar {
@@ -147,10 +100,16 @@ body {
   color: #78350f;
 }
 
+/* Lưới Breeds Grid */
 .breed-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 1.25rem;
+}
+
+/* Khi Offline: lưới tự co giãn gọn hơn */
+.offline-grid {
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
 }
 
 .breed-card {
@@ -169,7 +128,12 @@ body {
   box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
 }
 
-/* Ảnh & Placeholder Fallback */
+/* Chế độ Offline: Card tối giản, viền tinh tế */
+.breed-card.offline-mode {
+  border-left: 4px solid #f59e0b;
+}
+
+/* Khung ảnh khi có mạng */
 .breed-image-wrap {
   width: 100%;
   height: 200px;
@@ -183,36 +147,6 @@ body {
   height: 100%;
   object-fit: cover;
   display: block;
-}
-
-.breed-image-placeholder {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
-  color: #475569;
-  padding: 1rem;
-  text-align: center;
-}
-
-.placeholder-icon {
-  font-size: 2.5rem;
-  margin-bottom: 0.25rem;
-}
-
-.placeholder-name {
-  font-weight: 700;
-  font-size: 0.95rem;
-  color: #1e293b;
-}
-
-.placeholder-note {
-  font-size: 0.75rem;
-  color: #64748b;
-  margin-top: 0.25rem;
 }
 
 .breed-card-body {
@@ -233,6 +167,10 @@ body {
 .breed-card-header h2 {
   font-size: 1.2rem;
   color: #0f172a;
+}
+
+.dog-icon {
+  font-size: 1.1rem;
 }
 
 .badge {
@@ -289,8 +227,9 @@ body {
   color: #64748b;
 }
 
+/* Phân trang cải tiến: Dropdown + Đầu/Cuối + Nút số */
 .footer-pagination {
-  margin-top: 1.5rem;
+  margin-top: 1.75rem;
 }
 
 .pagination {
@@ -298,25 +237,81 @@ body {
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: 0.75rem;
+  gap: 1rem;
   background: #ffffff;
   border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  padding: 0.85rem 1.25rem;
+}
+
+.pagination-info {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1.25rem;
 }
 
 .pagination-text {
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   color: #475569;
+}
+
+.page-select-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.88rem;
+  color: #334155;
+}
+
+.page-dropdown {
+  padding: 0.35rem 0.65rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 0.88rem;
+  background-color: #f8fafc;
+  color: #0f172a;
+  cursor: pointer;
 }
 
 .pagination-actions {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  flex-wrap: wrap;
+  gap: 0.35rem;
 }
 
-.pagination-current {
-  font-size: 0.88rem;
+.btn-nav {
+  padding: 0.35rem 0.65rem;
+  font-size: 0.82rem;
+}
+
+.btn-page-number {
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
   color: #1e293b;
+  border-radius: 6px;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  min-width: 34px;
+  text-align: center;
+  transition: all 0.15s;
+}
+
+.btn-page-number:hover {
+  background: #f1f5f9;
+}
+
+.btn-page-number.active {
+  background: #2563eb;
+  color: #ffffff;
+  border-color: #2563eb;
+}
+
+.page-ellipsis {
+  color: #94a3b8;
+  padding: 0 0.2rem;
+  font-weight: 600;
 }

@@ -1,31 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import type { BreedResource } from '../types/breeds.types';
 
 interface BreedCardProps {
   breed: BreedResource;
+  isOnline: boolean;
 }
 
-export function BreedCard({ breed }: BreedCardProps): React.JSX.Element {
+export function BreedCard({ breed, isOnline }: BreedCardProps): React.JSX.Element {
   const attr = breed.attributes;
 
-  // 1. Link ảnh tĩnh CDN trực tiếp (.webp / .jpg)
-  const directImageUrl = attr.images?.[0]?.medium || attr.images?.[0]?.url || null;
-
-  // 2. KHÔNG chặn trước bằng navigator.onLine! Ban đầu luôn để false để thẻ <img>
-  // có cơ hội lấy file ảnh từ Disk Cache (nếu đã từng xem qua trước đó).
-  const [imgError, setImgError] = useState<boolean>(!directImageUrl);
-
-  // 3. Khi có mạng trở lại, tự động reset để tải lại ảnh thật
-  useEffect(() => {
-    if (!directImageUrl) return;
-
-    const handleOnline = () => {
-      setImgError(false);
-    };
-
-    window.addEventListener('online', handleOnline);
-    return () => window.removeEventListener('online', handleOnline);
-  }, [directImageUrl]);
+  // Lấy link ảnh từ CDN
+  const imageUrl = attr.images?.[0]?.medium || attr.images?.[0]?.url || null;
 
   const lifeMin = attr.life?.min ?? '?';
   const lifeMax = attr.life?.max ?? '?';
@@ -35,34 +20,26 @@ export function BreedCard({ breed }: BreedCardProps): React.JSX.Element {
   const femaleMax = attr.female_weight?.max ?? '?';
 
   return (
-    <article className="breed-card">
-      <div className="breed-image-wrap">
-        {directImageUrl && !imgError ? (
+    <article className={`breed-card ${!isOnline ? 'offline-mode' : ''}`}>
+      {/* 1. KHI CÓ MẠNG (isOnline = true): Hiển thị khung ảnh media sinh động */}
+      {isOnline && imageUrl && (
+        <div className="breed-image-wrap">
           <img
-            src={directImageUrl}
+            src={imageUrl}
             alt={attr.name}
             loading="lazy"
             className="breed-image"
-            // Chỉ khi trình duyệt thực sự không tìm thấy ảnh trong Disk Cache
-            // và cũng không có mạng để tải, sự kiện onError mới kích hoạt Placeholder
-            onError={() => setImgError(true)}
           />
-        ) : (
-          <div className="breed-image-placeholder">
-            <span className="placeholder-icon">🐕</span>
-            <span className="placeholder-name">{attr.name}</span>
-            <small className="placeholder-note">
-              {!directImageUrl
-                ? 'Chưa có ảnh từ máy chủ'
-                : 'Ảnh chưa kịp lưu cache khi Offline'}
-            </small>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
 
+      {/* 2. Thân Card (Cả 2 chế độ đều hiển thị thông tin rõ ràng, khi offline thì co gọn tinh tế) */}
       <div className="breed-card-body">
         <div className="breed-card-header">
-          <h2>{attr.name}</h2>
+          <h2>
+            {!isOnline && <span className="dog-icon">🐾 </span>}
+            {attr.name}
+          </h2>
           <span className={`badge ${attr.hypoallergenic ? 'badge-yes' : 'badge-no'}`}>
             Hypoallergenic: {attr.hypoallergenic ? 'Yes' : 'No'}
           </span>

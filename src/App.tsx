@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useAppDispatch, useAppSelector } from './store/hooks';
 import { fetchAllBreeds } from './store/breedsThunks';
+import { useOnlineStatus } from './hooks/useOnlineStatus';
 import { BreedList } from './components/BreedList';
 import { ErrorState } from './components/ErrorState';
 import { Pagination } from './components/Pagination';
@@ -11,20 +12,26 @@ const PAGE_SIZE = 12;
 export default function App(): React.JSX.Element {
   const dispatch = useAppDispatch();
   const { items, status, error } = useAppSelector((state) => state.breeds);
+  const isOnline = useOnlineStatus();
 
   const [currentPage, setCurrentPage] = useState<number>(1);
 
-  // 1. Initial fetch with cleanup abort (Cancels previous duplicate request on StrictMode remount)
+  // 1. Initial fetch with cleanup abort on mount
   useEffect(() => {
     const promise = dispatch(fetchAllBreeds());
-
     return () => {
-      // Hủy request của lần mount thứ nhất nếu component unmount
       promise.abort();
     };
   }, [dispatch]);
 
-  const handleCallApi = () => {
+  // 2. Tự động đồng bộ lại khi có mạng trở lại
+  useEffect(() => {
+    if (isOnline) {
+      dispatch(fetchAllBreeds());
+    }
+  }, [isOnline, dispatch]);
+
+  const handleRetry = () => {
     dispatch(fetchAllBreeds());
   };
 
@@ -42,47 +49,32 @@ export default function App(): React.JSX.Element {
       {/* Header */}
       <header className="header">
         <h1>🐾 Dog Breeds Explorer</h1>
-        <p>Redux Toolkit + Redux Persist (Offline Handling)</p>
+        <p>Redux Toolkit + Redux Persist (Offline-First Adaptive UI)</p>
       </header>
 
-      {/* Control Action Bar */}
-      <div className="control-bar">
-        <button
-          type="button"
-          className="btn btn-primary"
-          onClick={handleCallApi}
-          disabled={isLoading}
-        >
-          {isLoading ? '⏳ Đang gọi API...' : '🔄 Gọi lại API get all breeds'}
-        </button>
-        <span className={`status-badge status-${status}`}>
-          Status: {status}
-        </span>
-      </div>
-
-      {/* Error state (when disconnected or API fails) */}
+      {/* Thông báo trạng thái: lỗi khi ngắt mạng hoặc loading */}
       {status === 'failed' && (
         <ErrorState
           error={error}
           cachedCount={totalCount}
-          onRetry={handleCallApi}
+          onRetry={handleRetry}
           isLoading={isLoading}
         />
       )}
 
-      {/* Loading feedback */}
+      {/* Loading bar */}
       {isLoading && (
         <div className="loading-bar">
           ⏳ Đang đồng bộ danh sách toàn bộ giống chó từ API...
         </div>
       )}
 
-      {/* Breeds List */}
+      {/* Danh sách giống chó (Tự động thích ứng: Online có ảnh, Offline gọn gàng dạng Text Card) */}
       <main className="main-content">
-        <BreedList breeds={paginatedBreeds} />
+        <BreedList breeds={paginatedBreeds} isOnline={isOnline} />
       </main>
 
-      {/* Pagination */}
+      {/* Phân trang: Có chọn nhanh trang bất kỳ ở giữa + nút Đầu/Cuối */}
       <footer className="footer-pagination">
         <Pagination
           currentPage={currentPage}
