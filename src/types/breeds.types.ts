@@ -3,6 +3,14 @@ export interface MinMaxRange {
   max: number;
 }
 
+export interface BreedImage {
+  id: string;
+  url: string;
+  thumb?: string;
+  medium?: string;
+  large?: string;
+}
+
 export interface BreedAttributes {
   name: string;
   description: string;
@@ -10,6 +18,7 @@ export interface BreedAttributes {
   male_weight: MinMaxRange;
   female_weight: MinMaxRange;
   hypoallergenic: boolean;
+  images?: BreedImage[];
 }
 
 export interface BreedResource {
@@ -32,4 +41,3 @@ export interface BreedsState {
   status: RequestStatus;
   error: string | null;
 }
-
