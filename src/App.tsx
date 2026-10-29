@@ -3,7 +3,6 @@ import { useAppDispatch, useAppSelector } from './store/hooks';
 import { fetchAllBreeds } from './store/breedsThunks';
 import { useOnlineStatus } from './hooks/useOnlineStatus';
 import { BreedList } from './components/BreedList';
-import { ErrorState } from './components/ErrorState';
 import { Pagination } from './components/Pagination';
 import './index.css';
 
@@ -11,7 +10,7 @@ const PAGE_SIZE = 12;
 
 export default function App(): React.JSX.Element {
   const dispatch = useAppDispatch();
-  const { items, status, error } = useAppSelector((state) => state.breeds);
+  const { items, status } = useAppSelector((state) => state.breeds);
   const isOnline = useOnlineStatus();
 
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -31,10 +30,6 @@ export default function App(): React.JSX.Element {
     }
   }, [isOnline, dispatch]);
 
-  const handleRetry = () => {
-    dispatch(fetchAllBreeds());
-  };
-
   const totalCount = items.length;
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
   const paginatedBreeds = useMemo(() => {
@@ -53,16 +48,6 @@ export default function App(): React.JSX.Element {
         <p>Redux Toolkit + Redux Persist (Offline-First Adaptive UI)</p>
       </header>
 
-      {/* Thông báo trạng thái: lỗi khi ngắt mạng hoặc loading */}
-      {isApiFailed && (
-        <ErrorState
-          error={error}
-          cachedCount={totalCount}
-          onRetry={handleRetry}
-          isLoading={isLoading}
-        />
-      )}
-
       {/* Loading bar */}
       {isLoading && (
         <div className="loading-bar">
@@ -70,7 +55,7 @@ export default function App(): React.JSX.Element {
         </div>
       )}
 
-      {/* Danh sách giống chó: Tự động ẩn sạch khung ảnh khi mất mạng / lỗi API */}
+      {/* Danh sách giống chó */}
       <main className="main-content">
         <BreedList
           breeds={paginatedBreeds}
@@ -79,7 +64,7 @@ export default function App(): React.JSX.Element {
         />
       </main>
 
-      {/* Phân trang: Có chọn nhanh trang bất kỳ ở giữa + nút Đầu/Cuối */}
+      {/* Phân trang */}
       <footer className="footer-pagination">
         <Pagination
           currentPage={currentPage}
